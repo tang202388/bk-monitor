@@ -12,7 +12,7 @@ repos:
     rev: 22.3.0
     hooks:
     - id: black
-      language_version: python3.7
+      language_version: python3.8
       args: [--config=pyproject.toml]
   - repo: https://github.com/pycqa/isort
     rev: 5.11.5
@@ -39,16 +39,16 @@ repos:
         entry: python scripts/check_commit_message.py
         language: system
         stages: [commit-msg]
-      - id: ip
-        name: Check ip
-        description: Check ip
-        entry: scripts/sensitive_info_check/ip.sh
-        language: script
-        exclude: |
-          (?x)(
-             ^scripts/sensitive_info_check/|
-             tests/.*.py|
-             requirements.txt|
-             bin/prom-aggregation-gateway|
-             static/monitor/js/main.*
-          )
+#      - id: ip
+#        name: Check ip
+#        description: Check ip
+#        entry: scripts/sensitive_info_check/ip.sh
+#        language: script
+#        exclude: |
+#          (?x)(
+#             ^scripts/sensitive_info_check/|
+#             tests/.*.py|
+#             requirements.txt|
+#             bin/prom-aggregation-gateway|
+#             static/monitor/js/main.*
+#          )

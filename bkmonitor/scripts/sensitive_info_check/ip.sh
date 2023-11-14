@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env sh
 BASE_DIR=`dirname "$0"`
 CHANGE_FILES=$@
 
