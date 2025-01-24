@@ -859,11 +859,18 @@ class NodeManInstaller(BaseInstaller):
             node_diff = {"": current_version.target_nodes}
 
         nodes = {}
+        dynamic_group_ids = []
         for diff_type, diff_nodes in node_diff.items():
             for diff_node in diff_nodes:
                 # 主机节点
                 if "bk_host_id" in diff_node:
                     nodes[diff_node["bk_host_id"]] = {"diff_type": diff_type, "child": []}
+                    continue
+
+                # 动态分组
+                if current_node_type == TargetNodeType.DYNAMIC_GROUP:
+                    nodes[f"{diff_node['bk_inst_id']}"] = {"diff_type": diff_type, "child": []}
+                    dynamic_group_ids.append(diff_node['bk_inst_id'])
                     continue
 
                 # 将服务/集群模板转换为拓扑节点
@@ -875,8 +882,27 @@ class NodeManInstaller(BaseInstaller):
                 for node in template_nodes:
                     nodes[f"{node['bk_obj_id']}|{node['bk_inst_id']}"] = {"diff_type": diff_type, "child": []}
 
+        # 查询动态分组及其组内的主机实例
+        dynamic_groups = []
+        if current_node_type == TargetNodeType.DYNAMIC_GROUP:
+            dynamic_groups = api.cmdb.search_dynamic_group(
+                bk_biz_id=self.collect_config.bk_biz_id,
+                bk_obj_id="host",
+                dynamic_group_ids=dynamic_group_ids,
+                with_instance_id=True,
+            )
+
         # 将任务状态与差异比对数据结构合并返回
         for instance in instance_statuses:
+            # 给动态分组内的主机实例加上状态信息
+            if current_node_type == TargetNodeType.DYNAMIC_GROUP:
+                for dynamic_group in dynamic_groups:
+                    nodes[dynamic_group["id"]]["dynamic_group_name"] = dynamic_group["name"]
+                    nodes[dynamic_group["id"]]["dynamic_group_id"] = dynamic_group["id"]
+                    if instance["bk_host_id"] in dynamic_group["instance_ids"]:
+                        nodes[dynamic_group["id"]]["child"].append(instance)
+                continue
+
             for scope_id in instance["scope_ids"]:
                 scope_ids = set()
                 if str(scope_id).startswith("module|"):
@@ -904,6 +930,20 @@ class NodeManInstaller(BaseInstaller):
                 diff_mapping[node_info["diff_type"]]["child"].extend(node_info["child"])
             for diff_type, diff_info in diff_mapping.items():
                 diff_info.update({"label_name": diff_type, "is_label": bool(diff_type)})
+        elif (current_node_type, self.collect_config.target_object_type) == (
+            TargetNodeType.DYNAMIC_GROUP,
+            TargetObjectType.HOST,
+        ):
+            diff_mapping = {}
+            for node_id, node_info in nodes.items():
+                diff_mapping[node_id] = {
+                    "child": node_info["child"],
+                    "node_path": _("动态分组"),
+                    "label_name": node_info["diff_type"],
+                    "is_label": bool(node_info["diff_type"]),
+                    "dynamic_group_name": node_info["dynamic_group_name"],
+                    "dynamic_group_id": node_info["dynamic_group_id"],
+                }
         else:
             # 服务/集群模板归属在对应的服务/集群模板下
             topo_links = self._get_topo_links()

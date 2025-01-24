@@ -92,7 +92,7 @@ MIDDLEWARE = (
     "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     # "django.middleware.csrf.CsrfViewMiddleware",
-    ensure_csrf_cookie,
+    # ensure_csrf_cookie,
     "weixin.core.middlewares.WeixinProxyPatchMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
@@ -100,16 +100,16 @@ MIDDLEWARE = (
     # 静态资源
     'whitenoise.middleware.WhiteNoiseMiddleware',
     # Auth middleware
-    "weixin.core.middlewares.WeixinAuthenticationMiddleware",
-    "weixin.core.middlewares.WeixinLoginMiddleware",
-    "blueapps.account.components.rio.middlewares.RioLoginRequiredMiddleware",
+    # "weixin.core.middlewares.WeixinAuthenticationMiddleware",
+    # "weixin.core.middlewares.WeixinLoginMiddleware",
+    # "blueapps.account.components.rio.middlewares.RioLoginRequiredMiddleware",
     # 用户登录验证middleware
-    "bkmonitor.middlewares.authentication.ApiTokenAuthenticationMiddleware",
+    # "bkmonitor.middlewares.authentication.ApiTokenAuthenticationMiddleware",
     # 应用流控保护，放在用户登录验证之后
-    "blueapps.middleware.xss.middlewares.CheckXssMiddleware",
+    # "blueapps.middleware.xss.middlewares.CheckXssMiddleware",
     # APIGW JWT验证中间件
-    "bkmonitor.middlewares.authentication.ApiGatewayJWTExternalMiddleware",
-    "apigw_manager.apigw.authentication.ApiGatewayJWTAppMiddleware",
+    # "bkmonitor.middlewares.authentication.ApiGatewayJWTExternalMiddleware",
+    # "apigw_manager.apigw.authentication.ApiGatewayJWTAppMiddleware",
     "common.middlewares.TimeZoneMiddleware",
     "common.middlewares.TrackSiteVisitMiddleware",
     "version_log.middleware.VersionLogMiddleware",
