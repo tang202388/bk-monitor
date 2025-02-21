@@ -841,10 +841,10 @@ class PluginManager(BasePluginManager):
             config_id = self._render_config(config_version, config_name, context)
             config_ids.append(config_id)
 
-        task_ids = self._run_debug(config_version, config_ids, host_info)
+        task_id = self._run_debug(config_version, config_ids, host_info)
 
         
-        return task_ids
+        return task_id
 
     def stop_debug(self, task_id: str):
         """
