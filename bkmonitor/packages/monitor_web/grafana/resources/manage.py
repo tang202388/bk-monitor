@@ -27,6 +27,7 @@ from constants.data_source import DataSourceLabel
 from core.drf_resource import Resource, api, resource
 from core.errors.dashboard import GetFolderOrDashboardError
 from monitor_web.grafana.permissions import DashboardPermission
+from monitor_web.tasks import migrate_all_old_panels_task
 
 logger = logging.getLogger(__name__)
 
@@ -823,3 +824,39 @@ class GetRelatedStrategy(Resource):
             )
 
         return result
+
+
+class MigrateOldPanelsByBiz(Resource):
+    """
+    将业务下旧版 panels 迁移到新版本
+    """
+
+    class RequestSerializer(serializers.Serializer):
+        bk_biz_id = serializers.IntegerField(label="业务ID", required=True)
+
+    def perform_request(self, params):
+
+        task = migrate_all_old_panels_task.delay(params['bk_biz_id'])
+        return {'task_id': task.id}
+
+
+# class MigrateOldPanelsStatus(Resource):
+#     class RequestSerializer(serializers.Serializer):
+#         task_id = serializers.CharField(required=True)
+#
+#     def perform_request(self, params):
+#         # 直接调用现有查询函数
+#         query_result = query_task_result(params['task_id'])
+#
+#         # 按接口需求结构化返回结果
+#         return {
+#             "result": True if query_result["state"] == "SUCCESS" else False,
+#             "code": 200,
+#             "message": query_result["message"],
+#             "data": {
+#                 "status": query_result["state"],
+#                 "is_completed": query_result["is_completed"],
+#                 "details": query_result["data"],
+#                 "traceback": query_result["traceback"] if settings.DEBUG else None
+#             }
+#         }

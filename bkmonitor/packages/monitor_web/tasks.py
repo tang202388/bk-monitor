@@ -82,6 +82,8 @@ from monitor_web.models.plugin import CollectorPluginMeta
 from monitor_web.plugin.constant import PLUGIN_REVERSED_DIMENSION
 from monitor_web.strategies.built_in import run_build_in
 from utils import business, count_md5
+# from bk_dataview.api import get_or_create_org
+# from bk_dataview.models import Dashboard
 
 logger = logging.getLogger("monitor_web")
 
@@ -1441,3 +1443,53 @@ def update_target_detail(bk_biz_id=None):
         except Exception as e:
             logger.exception(f"[update_target_detail] failed for strategy({item.strategy_id}): {e}")
         logger.info(f"[update_target_detail] strategy({item.strategy_id}) done")
+
+print("Loading monitor_web.tasks module")
+
+@shared_task(queue="celery_resource", ignore_result=True)
+def migrate_all_old_panels_task(bk_biz_id):
+    import signal
+    signal.signal(signal.SIGPIPE, signal.SIG_IGN)
+    from bk_dataview.api import get_or_create_org
+    from bk_dataview.models import Dashboard
+
+    print("migrate_all_old_panels_task called")
+
+    org_id = get_or_create_org(str(bk_biz_id))["id"]
+    all_dashboards = list(Dashboard.objects.filter(org_id=org_id, is_folder=False))
+
+    result = {
+        'total_success_panels': 0,
+        'total_failed_panels': 0,
+        'details': {},
+        'dashboard_errors': []
+    }
+
+    for dashboard in all_dashboards:
+
+        response = resource.grafana.migrate_old_panels({
+            'bk_biz_id': bk_biz_id,
+            'dashboard_uid': dashboard.uid
+        })
+
+        if response.get('result'):
+            dashboard_result = response.get('data', {})
+            result['total_success_panels'] += dashboard_result.get('success_total', 0)
+            result['total_failed_panels'] += dashboard_result.get('failed_total', 0)
+
+            # 记录详细信息
+            result['details'][dashboard.uid] = {
+                'success': dashboard_result.get('success_total', 0),
+                'failed': dashboard_result.get('failed_total', 0),
+                'details': {
+                    'success': dashboard_result.get('success_details', {}),
+                    'failed': dashboard_result.get('failed_details', {})
+                }
+            }
+        else:
+            result['dashboard_errors'].append({
+                'dashboard_uid': dashboard.uid,
+                'error': response.get('message')
+            })
+    print(result)
+    return result
