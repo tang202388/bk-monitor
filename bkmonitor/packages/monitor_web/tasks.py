@@ -1492,4 +1492,4 @@ def migrate_all_old_panels_task(bk_biz_id):
                 'error': response.get('message')
             })
     print(result)
-    return result
+    # return result
