@@ -86,6 +86,8 @@ import { useI18n } from 'vue-i18n';
 
 import IssuesDetailSideSlider from './alarm-issues/issues-detail/issues-detail-sideslider';
 import IssuesTable from './alarm-issues/issues-table/issues-table';
+import { useIssuesOperations } from './composables/use-issues-operations';
+import { useIssuesTable } from './composables/use-issues-table';
 import { saveAlertContentName } from './services/alert-services';
 import EmptyStatus from '@/components/empty-status/empty-status';
 
@@ -132,6 +134,28 @@ export default defineComponent({
       handleAlertDialogHide,
       handleAlertDialogConfirm,
     } = useAlertDialogs(data as unknown as ShallowRef<AlertTableItem[]>);
+
+    // ===================== Issues 表格 =====================
+
+    const {
+      allData: issuesAllData,
+      tableData: issuesTableData,
+      pagination: issuesPagination,
+      sort: issuesSort,
+      selectedRowKeys: issuesSelectedRowKeys,
+      loading: issuesLoading,
+      handleCurrentPageChange: handleIssuesCurrentPageChange,
+      handlePageSizeChange: handleIssuesPageSizeChange,
+      handleSortChange: handleIssuesSortChange,
+      handleSelectionChange: handleIssuesSelectionChange,
+    } = useIssuesTable();
+
+    const {
+      handleAssign: handleIssuesAssign,
+      handleMarkResolved: handleIssuesMarkResolved,
+      handlePriorityChange: handleIssuesPriorityChange,
+      handleShowDetail: handleIssuesShowDetail,
+    } = useIssuesOperations({ allData: issuesAllData });
 
     const favoriteBox = useTemplateRef<ComponentPublicInstance<typeof FavoriteBox>>('favoriteBox');
     const allFavoriteList = computed(() => {
@@ -794,6 +818,19 @@ export default defineComponent({
       handleShowResidentBtnChange,
       handleQuickFilteringOperation,
       handleCopyWhereQueryString,
+      issuesTableData,
+      issuesPagination,
+      issuesSort,
+      issuesSelectedRowKeys,
+      issuesLoading,
+      handleIssuesCurrentPageChange,
+      handleIssuesPageSizeChange,
+      handleIssuesSortChange,
+      handleIssuesSelectionChange,
+      handleIssuesAssign,
+      handleIssuesMarkResolved,
+      handleIssuesPriorityChange,
+      handleIssuesShowDetail,
     };
   },
   render() {
@@ -889,7 +926,21 @@ export default defineComponent({
                       )}
                       <div class='alarm-center-table'>
                         {this.alarmStore.alarmType === AlarmType.ISSUES ? (
-                          <IssuesTable />
+                          <IssuesTable
+                            data={this.issuesTableData}
+                            loading={this.issuesLoading}
+                            pagination={this.issuesPagination}
+                            selectedRowKeys={this.issuesSelectedRowKeys}
+                            sort={this.issuesSort}
+                            onAssign={this.handleIssuesAssign}
+                            onCurrentPageChange={this.handleIssuesCurrentPageChange}
+                            onMarkResolved={this.handleIssuesMarkResolved}
+                            onPageSizeChange={this.handleIssuesPageSizeChange}
+                            onPriorityChange={this.handleIssuesPriorityChange}
+                            onSelectionChange={this.handleIssuesSelectionChange}
+                            onShowDetail={this.handleIssuesShowDetail}
+                            onSortChange={this.handleIssuesSortChange}
+                          />
                         ) : (
                           <AlarmTable
                             pagination={{
