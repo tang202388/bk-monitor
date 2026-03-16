@@ -86,6 +86,7 @@ import { useI18n } from 'vue-i18n';
 
 import IssuesDetailSideSlider from './alarm-issues/issues-detail/issues-detail-sideslider';
 import IssuesTable from './alarm-issues/issues-table/issues-table';
+import IssuesToolbar from './alarm-issues/issues-toolbar/issues-toolbar';
 import { useIssuesOperations } from './composables/use-issues-operations';
 import { useIssuesTable } from './composables/use-issues-table';
 import { saveAlertContentName } from './services/alert-services';
@@ -834,6 +835,9 @@ export default defineComponent({
     };
   },
   render() {
+    /** 表格固定配置项(表头吸顶、横向滚动条吸底)*/
+    const tableAffixed = { container: `.${CONTENT_SCROLL_ELEMENT_CLASS_NAME}` };
+
     return (
       <div class='alarm-center-page'>
         <div
@@ -926,21 +930,27 @@ export default defineComponent({
                       )}
                       <div class='alarm-center-table'>
                         {this.alarmStore.alarmType === AlarmType.ISSUES ? (
-                          <IssuesTable
-                            data={this.issuesTableData}
-                            loading={this.issuesLoading}
-                            pagination={this.issuesPagination}
-                            selectedRowKeys={this.issuesSelectedRowKeys}
-                            sort={this.issuesSort}
-                            onAssign={this.handleIssuesAssign}
-                            onCurrentPageChange={this.handleIssuesCurrentPageChange}
-                            onMarkResolved={this.handleIssuesMarkResolved}
-                            onPageSizeChange={this.handleIssuesPageSizeChange}
-                            onPriorityChange={this.handleIssuesPriorityChange}
-                            onSelectionChange={this.handleIssuesSelectionChange}
-                            onShowDetail={this.handleIssuesShowDetail}
-                            onSortChange={this.handleIssuesSortChange}
-                          />
+                          <IssuesToolbar selectedRowKeys={this.issuesSelectedRowKeys}>
+                            <IssuesTable
+                              columns={this.tableSourceColumns}
+                              data={this.issuesTableData}
+                              headerAffixedTop={tableAffixed}
+                              horizontalScrollAffixedBottom={tableAffixed}
+                              loading={this.issuesLoading}
+                              pagination={this.issuesPagination}
+                              scrollContainerSelector={`.${CONTENT_SCROLL_ELEMENT_CLASS_NAME}`}
+                              selectedRowKeys={this.issuesSelectedRowKeys}
+                              sort={this.issuesSort}
+                              onAssign={this.handleIssuesAssign}
+                              onCurrentPageChange={this.handleIssuesCurrentPageChange}
+                              onMarkResolved={this.handleIssuesMarkResolved}
+                              onPageSizeChange={this.handleIssuesPageSizeChange}
+                              onPriorityChange={this.handleIssuesPriorityChange}
+                              onSelectionChange={this.handleIssuesSelectionChange}
+                              onShowDetail={this.handleIssuesShowDetail}
+                              onSortChange={this.handleIssuesSortChange}
+                            />
+                          </IssuesToolbar>
                         ) : (
                           <AlarmTable
                             pagination={{
@@ -956,8 +966,11 @@ export default defineComponent({
                             columns={this.tableSourceColumns}
                             data={this.data}
                             defaultActiveRowKeys={this.defaultActiveRowKeys}
+                            headerAffixedTop={tableAffixed}
+                            horizontalScrollAffixedBottom={tableAffixed}
                             isSelectedFollower={this.isSelectedFollower}
                             loading={this.loading}
+                            scrollContainerSelector={`.${CONTENT_SCROLL_ELEMENT_CLASS_NAME}`}
                             selectedRowKeys={this.selectedRowKeys}
                             sort={this.ordering}
                             timeRange={this.alarmStore.timeRange}
