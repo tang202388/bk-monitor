@@ -85,6 +85,8 @@ import { traceGenerateQueryString } from 'monitor-api/modules/apm_trace';
 import { handleTransformToTimestamp } from 'trace/components/time-range/utils';
 import { useI18n } from 'vue-i18n';
 
+import { useIssuesImpactScopeDrawer } from './alarm-issues/components/issues-impact-scope-drawer/hooks/use-issues-impact-scope-drawer';
+import IssuesImpactScopeDrawer from './alarm-issues/components/issues-impact-scope-drawer/issues-impact-scope-drawer';
 import { useIssuesDialogs } from './alarm-issues/components/issues-operation-dialogs/hooks/use-issues-dialogs';
 import IssuesOperationDialogs from './alarm-issues/components/issues-operation-dialogs/issues-operation-dialogs';
 import { IssuesBatchActionEnum } from './alarm-issues/constant';
@@ -223,6 +225,10 @@ export default defineComponent({
     const editFavoriteShow = shallowRef(false);
 
     const issuesDetailShow = shallowRef(true);
+
+    const { impactScopeDrawerShow, impactScopeResourceKey, impactScopeResource, handleImpactScopeClick } =
+      useIssuesImpactScopeDrawer();
+
     /**
      * @description 检索栏字段列表
      */
@@ -792,6 +798,10 @@ export default defineComponent({
       alarmDetailDefaultTab,
       showResidentBtn,
       issuesDetailShow,
+      impactScopeDrawerShow,
+      impactScopeResourceKey,
+      impactScopeResource,
+      handleImpactScopeClick,
       setUrlParams,
       handleSelectedRowKeysChange,
       handleAlertDialogShow,
@@ -984,6 +994,7 @@ export default defineComponent({
                                 this.handleIssuesDialogShow(IssuesBatchActionEnum.ASSIGN, id, data)
                               }
                               onCurrentPageChange={this.handleCurrentPageChange}
+                              onImpactScopeClick={this.handleImpactScopeClick}
                               onMarkResolved={(id: string) =>
                                 this.handleIssuesDialogShow(IssuesBatchActionEnum.RESOLVE, id)
                               }
@@ -1088,6 +1099,16 @@ export default defineComponent({
               if (!v) {
                 this.handleIssuesDialogHide();
               }
+            }}
+          />
+
+          <IssuesImpactScopeDrawer
+            resource={this.impactScopeResource}
+            resourceKey={this.impactScopeResourceKey}
+            show={this.impactScopeDrawerShow}
+            onUpdate:show={(v: boolean) => {
+              if (v) return;
+              this.handleImpactScopeClick();
             }}
           />
         </div>
