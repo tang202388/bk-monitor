@@ -56,6 +56,7 @@ import type { AlertSavePromiseEvent } from './components/alert-content-detail/al
 import type { ActionScenario } from './scenarios/action-scenario';
 import type { AlertScenario } from './scenarios/alert-scenario';
 import type { IncidentScenario } from './scenarios/incident-scenario';
+import type { TimeRangeType } from '@/components/time-range/utils';
 import type { BkUiSettings } from '@blueking/tdesign-ui/.';
 import type { SelectOptions, SlotReturnValue } from 'tdesign-vue-next';
 
@@ -108,7 +109,7 @@ export default defineComponent({
     },
     /** 时间范围 [from, to] */
     timeRange: {
-      type: Array as PropType<(number | string)[]>,
+      type: Array as PropType<TimeRangeType>,
       default: () => [],
     },
     /** 滚动容器的 CSS 选择器（用于滚动优化及表头/滚动条吸附） */
@@ -120,11 +121,6 @@ export default defineComponent({
     },
     horizontalScrollAffixedBottom: {
       type: Object as PropType<{ container: string }>,
-    },
-    /** 是否展示分页 */
-    showPage: {
-      type: Boolean,
-      default: true,
     },
   },
   emits: {
@@ -264,7 +260,6 @@ export default defineComponent({
           loading={this.loading}
           pagination={this.pagination}
           selectedRowKeys={this.selectedRowKeys}
-          showPage={this.showPage}
           sort={this.sort}
           tableSettings={this.settings}
           onCurrentPageChange={page => this.$emit('currentPageChange', page)}
